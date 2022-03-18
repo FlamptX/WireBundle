@@ -53,7 +53,7 @@ Bundler2bit:
                     x: 0
                     y: 0
                     z: 0
-    logicCode: WireBundle.Components.BundlerBase
+    logicCode: WireBundle.Components.Bundler
     placingRules:
         offsetDimensions:
             x: 2
@@ -156,7 +156,7 @@ Bundler4bit:
                     x: 0
                     y: 0
                     z: 0
-    logicCode: WireBundle.Components.BundlerBase
+    logicCode: WireBundle.Components.Bundler
     placingRules:
         offsetDimensions:
             x: 2
@@ -299,7 +299,7 @@ Bundler8bit:
                     x: 0
                     y: 0
                     z: 0
-    logicCode: WireBundle.Components.BundlerBase
+    logicCode: WireBundle.Components.Bundler
     placingRules:
         offsetDimensions:
             x: 4
@@ -522,7 +522,7 @@ Bundler16bit:
                     x: 0
                     y: 0
                     z: 0
-    logicCode: WireBundle.Components.BundlerBase
+    logicCode: WireBundle.Components.Bundler
     placingRules:
         offsetDimensions:
             x: 7

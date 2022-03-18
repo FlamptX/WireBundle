@@ -9,7 +9,7 @@ using WireBundle.Server;
 
 namespace WireBundle.Components
 {
-    public class BundlerBase : LogicComponent
+    public class Bundler : LogicComponent
     {
         protected override void Initialize()
         {

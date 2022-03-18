@@ -54,7 +54,7 @@ Splitter2bit:
                     y: 0
                     z: 90
                 length: 0.5
-    logicCode: WireBundle.Components.SplitterBase
+    logicCode: WireBundle.Components.Splitter
     placingRules:
         offsetDimensions:
             x: 2
@@ -159,7 +159,7 @@ Splitter4bit:
                     y: 0
                     z: 90
                 length: 0.5
-    logicCode: WireBundle.Components.SplitterBase
+    logicCode: WireBundle.Components.Splitter
     placingRules:
         offsetDimensions:
             x: 2
@@ -308,7 +308,7 @@ Splitter8bit:
                     y: 0
                     z: 90
                 length: 0.5
-    logicCode: WireBundle.Components.SplitterBase
+    logicCode: WireBundle.Components.Splitter
     placingRules:
         offsetDimensions:
             x: 2
@@ -545,7 +545,7 @@ Splitter16bit:
                     y: 0
                     z: 90
                 length: 0.5
-    logicCode: WireBundle.Components.SplitterBase
+    logicCode: WireBundle.Components.Splitter
     placingRules:
         offsetDimensions:
             x: 2

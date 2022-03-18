@@ -18,7 +18,7 @@ using WireBundle.Server;
 
 namespace WireBundle.Components
 {
-    public class SplitterBase : LogicComponent
+    public class Splitter : LogicComponent
     {
         private IComponentInWorld connectedComponentInWorld;
         private PegAddress pegAddress;
@@ -70,7 +70,7 @@ namespace WireBundle.Components
                 if (!connected)
                 {
                     connectedComponentInWorld = (IComponentInWorld)lookupComponentDelegate.DynamicInvoke(connectedPeg.ComponentAddress);
-                    BundlerBase connectedComponent;
+                    Bundler connectedComponent;
                     bool result = Bundlers.Components.TryGetValue(connectedComponentInWorld, out connectedComponent);
                     if (result)
                     {
@@ -90,7 +90,7 @@ namespace WireBundle.Components
             {
                 if (connected & wireAddresses.Count == 1)
                 {
-                    BundlerBase connectedComponent;
+                    Bundler connectedComponent;
                     bool result = Bundlers.Components.TryGetValue(connectedComponentInWorld, out connectedComponent);
                     if (result)
                     {

@@ -18,6 +18,6 @@ namespace WireBundle.Server
 
     public static class Bundlers
     {
-        public static Dictionary<IComponentInWorld, BundlerBase> Components = new Dictionary<IComponentInWorld, BundlerBase>();
+        public static Dictionary<IComponentInWorld, Bundler> Components = new Dictionary<IComponentInWorld, Bundler>();
     }
 }
