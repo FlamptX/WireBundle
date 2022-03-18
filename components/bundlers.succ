@@ -1,0 +1,551 @@
+Bundler2bit:
+    column: WireBundle
+    category: Bundlers
+    prefab:
+        blocks:
+            -
+                color:
+                    r: 0
+                    g: 95
+                    b: 237
+                scale:
+                    x: 0.5
+                    y: 0.8
+                    z: 0.9
+                meshType: Cube
+                position:
+                    x: 0
+                    y: 0
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+        inputs:
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+        outputs:
+            -
+                startOn: false
+                position:
+                    x: -0.25
+                    y: 0.25
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+    logicCode: WireBundle.Components.BundlerBase
+    placingRules:
+        offsetDimensions:
+            x: 2
+            y: 1
+        defaultOffset:
+            x: 0
+            y: 0
+        offsetScale:
+            x: 1
+            y: 1
+        cornerMidpoint:
+            x: 0
+            y: 0
+        gridPlacingDimensions:
+            x: 1
+            y: 1
+        allowWorldRotation: true
+        allowFineRotation: false
+        canBeFlipped: false
+        flippingPointHeight: -0.25
+        gridPositionsAreRelative: false
+        enableEdgeExtensions: false
+        primaryGridPositions:
+            -
+                x: 0.5
+                y: 0.5
+
+Bundler4bit:
+    column: WireBundle
+    category: Bundlers
+    prefab:
+        blocks:
+            -
+                color:
+                    r: 0
+                    g: 95
+                    b: 237
+                scale:
+                    x: 0.5
+                    y: 0.8
+                    z: 1.6
+                meshType: Cube
+                position:
+                    x: 0
+                    y: 0
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+        inputs:
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -0.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 0.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+        outputs:
+            -
+                startOn: false
+                position:
+                    x: -0.25
+                    y: 0.25
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+    logicCode: WireBundle.Components.BundlerBase
+    placingRules:
+        offsetDimensions:
+            x: 2
+            y: 1
+        defaultOffset:
+            x: 0
+            y: 0
+        offsetScale:
+            x: 2
+            y: 1
+        cornerMidpoint:
+            x: 0
+            y: 0
+        gridPlacingDimensions:
+            x: 2
+            y: 1
+        allowWorldRotation: true
+        allowFineRotation: false
+        canBeFlipped: false
+        flippingPointHeight: -0.25
+        gridPositionsAreRelative: false
+        enableEdgeExtensions: false
+        primaryGridPositions:
+            -
+                x: 0.5
+                y: 0.5
+
+Bundler8bit:
+    column: WireBundle
+    category: Bundlers
+    prefab:
+        blocks:
+            -
+                color:
+                    r: 0
+                    g: 95
+                    b: 237
+                scale:
+                    x: 0.5
+                    y: 0.8
+                    z: 3.2
+                meshType: Cube
+                position:
+                    x: 0
+                    y: 0
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+        inputs:
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -1.4
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -1
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -0.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 0.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 1
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 1.4
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+        outputs:
+            -
+                startOn: false
+                position:
+                    x: -0.25
+                    y: 0.25
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+    logicCode: WireBundle.Components.BundlerBase
+    placingRules:
+        offsetDimensions:
+            x: 4
+            y: 1
+        defaultOffset:
+            x: 0
+            y: 0
+        offsetScale:
+            x: 4
+            y: 1
+        cornerMidpoint:
+            x: 0
+            y: 0
+        gridPlacingDimensions:
+            x: 4
+            y: 1
+        allowWorldRotation: true
+        allowFineRotation: false
+        canBeFlipped: false
+        flippingPointHeight: -0.25
+        gridPositionsAreRelative: false
+        enableEdgeExtensions: false
+        primaryGridPositions:
+            -
+                x: 0.5
+                y: 0.5
+
+Bundler16bit:
+    column: WireBundle
+    category: Bundlers
+    prefab:
+        blocks:
+            -
+                color:
+                    r: 0
+                    g: 95
+                    b: 237
+                scale:
+                    x: 0.5
+                    y: 0.8
+                    z: 6.45
+                meshType: Cube
+                position:
+                    x: 0
+                    y: 0
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+        inputs:
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -3
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -2.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -2.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -1.8
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -1.4
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -1
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -0.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: -0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 0.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 0.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 1
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 1.4
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 1.8
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 2.2
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 2.6
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+            -
+                length: 0.4
+                position:
+                    x: 0.25
+                    y: 0.4
+                    z: 3
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 270
+        outputs:
+            -
+                startOn: false
+                position:
+                    x: -0.25
+                    y: 0.25
+                    z: 0
+                rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+    logicCode: WireBundle.Components.BundlerBase
+    placingRules:
+        offsetDimensions:
+            x: 7
+            y: 1
+        defaultOffset:
+            x: 0
+            y: 0
+        offsetScale:
+            x: 7
+            y: 1
+        cornerMidpoint:
+            x: 0
+            y: 0
+        gridPlacingDimensions:
+            x: 7
+            y: 1
+        allowWorldRotation: true
+        allowFineRotation: false
+        canBeFlipped: false
+        flippingPointHeight: -0.25
+        gridPositionsAreRelative: false
+        enableEdgeExtensions: false
+        primaryGridPositions:
+            -
+                x: 0.5
+                y: 0.5
