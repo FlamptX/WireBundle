@@ -26,13 +26,19 @@ namespace WireBundle.Components
         private bool connected = false;
 
         private static readonly IWorldData worldData;
+        private static readonly FieldInfo pegCircuitStateField;
         
         static Splitter()
         {
             worldData = Program.Get<IWorldData>();
-            if(worldData == null)
+            if (worldData == null)
             {
                 throw new Exception("Could not get service IWorldData. Report this issue to the developer of this mod.");
+            }
+            pegCircuitStateField = typeof(InputPeg).GetField("CircuitStates", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (pegCircuitStateField == null)
+            {
+                throw new Exception("Could not get field 'CircuitStates' of class 'InputPeg'. Report this issue to the developer of this mod.");
             }
         }
         
@@ -97,13 +103,12 @@ namespace WireBundle.Components
                 }
                 else if (connected & wireAddresses.Count == 0)
                 {
-                    FieldInfo pegField = typeof(InputPeg).GetField("CircuitStates", BindingFlags.NonPublic | BindingFlags.Instance);
                     for (int i = 1; i < base.Inputs.Count; i++)
                     {
                         InputPeg inputPegObj = (InputPeg)base.Inputs[i];
-                        CircuitStates pegFieldValue = (CircuitStates)pegField.GetValue(inputPegObj);
+                        CircuitStates pegFieldValue = (CircuitStates)pegCircuitStateField.GetValue(inputPegObj);
                         pegFieldValue[inputPegObj.StateID] = false;
-                        pegField.SetValue(inputPegObj, pegFieldValue);
+                        pegCircuitStateField.SetValue(inputPegObj, pegFieldValue);
                     }
                 }
             }
