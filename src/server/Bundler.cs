@@ -1,34 +1,44 @@
-using System;
-using System.Linq;
 using System.Collections.Generic;
 
-using LogicWorld.Server.Circuitry;
 using LogicAPI.Server.Components;
-
-using WireBundle.Server;
 
 namespace WireBundle.Components
 {
     public class Bundler : LogicComponent
     {
-        protected override void Initialize()
-        {
-            Bundlers.Components.Add(this.Component, this);
-        }
+        private readonly List<Splitter> linkedSplitters = new List<Splitter>();
 
         public override void OnComponentDestroyed()
         {
-            Bundlers.Components.Remove(this.Component);
+            foreach (Splitter linkedSplitter in linkedSplitters)
+            {
+                linkedSplitter.bundlerDestroyed();
+            }
+            linkedSplitters.Clear();
         }
 
         protected override void DoLogicUpdate()
         {
+            //TODO: This will unfortunately always be 1 tick delayed. Make it instant regardless. If technically even possible... Probably would need a hidden peg. Or make this output a peg.
             bool active = false;
-            for (int i = 0; i < base.Inputs.Count; i++)
+            for (int i = 0; i < Inputs.Count; i++)
             {
-                if (base.Inputs[i].On) { active = true; }
+                if (Inputs[i].On)
+                {
+                    active = true;
+                }
             }
-            base.Outputs[0].On = active;
+            Outputs[0].On = active;
+        }
+
+        public void unregisterSplitter(Splitter splitter)
+        {
+            linkedSplitters.Remove(splitter);
+        }
+
+        public void registerSplitter(Splitter splitter)
+        {
+            linkedSplitters.Add(splitter);
         }
     }
 }

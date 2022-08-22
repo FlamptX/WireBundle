@@ -1,121 +1,158 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Linq;
 
 using LogicAPI.Server.Components;
 using LogicAPI.Services;
 using LogicAPI.Data;
-using LogicLog;
 
-using LogicWorld.SharedCode.Components;
+using LogicWorld.Server;
 using LogicWorld.Server.Circuitry;
-using LogicWorld.SharedCode;
-
-using WireBundle.Components;
-using WireBundle.Server;
 
 namespace WireBundle.Components
 {
     public class Splitter : LogicComponent
     {
-        private IComponentInWorld connectedComponentInWorld;
-        private PegAddress pegAddress;
-        private PegAddress connectedPeg;
-        private bool connected = false;
+        private Bundler remoteBundler;
 
-        // Reflection is nice
-        private static Assembly SharedCodeAssembly = AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name == "LogicWorld.SharedCode");
-        private static Type worldDataType = SharedCodeAssembly.GetType("LogicWorld.SharedCode.WorldData");
-        private static MethodInfo LookupPegWires = worldDataType.GetMethod("LookupPegWires");
-        private static MethodInfo LookupWire = worldDataType.GetMethod("Lookup", new Type[]{ typeof(WireAddress) });
-        private static MethodInfo LookupComponent = worldDataType.GetMethod("Lookup", new Type[]{ typeof(ComponentAddress) });
-        private static object worldDataInstance = LogicAPI.Service.Get<IWorldData>();
+        private static readonly IWorldData worldData;
+        private static readonly ICircuitryManager circuitryManager;
 
-        private static Delegate lookupPegWiresDelegate = LookupPegWires.CreateDelegate(Expression.GetDelegateType(
-           (from parameter in LookupPegWires.GetParameters() select parameter.ParameterType)
-           .Concat(new[] { LookupPegWires.ReturnType })
-           .ToArray()), worldDataInstance);
-        private static Delegate lookupWireDelegate = LookupWire.CreateDelegate(Expression.GetDelegateType(
-            (from parameter in LookupWire.GetParameters() select parameter.ParameterType)
-            .Concat(new[] { LookupWire.ReturnType })
-            .ToArray()), worldDataInstance);
-        private static Delegate lookupComponentDelegate = LookupComponent.CreateDelegate(Expression.GetDelegateType(
-            (from parameter in LookupComponent.GetParameters() select parameter.ParameterType)
-            .Concat(new[] { LookupComponent.ReturnType })
-            .ToArray()), worldDataInstance);
-
-        protected override void Initialize()
+        private static readonly PropertyInfo clusterProperty;
+        private static readonly FieldInfo linkerField;
+        
+        static Splitter()
         {
-            pegAddress = base.Inputs[0].Address;
-        }
- 
-        protected override void DoLogicUpdate()
-        {
-            HashSet<WireAddress> wireAddresses = (HashSet<WireAddress>)lookupPegWiresDelegate.DynamicInvoke(pegAddress);
-            if (base.Inputs[0].On)
+            //Get the services, and confirm, that they are available:
+            worldData = Program.Get<IWorldData>();
+            if (worldData == null)
             {
-                Wire wire = (Wire)lookupWireDelegate.DynamicInvoke(wireAddresses.First());
-                if (wire.Point1.ToString() != pegAddress.ToString())
+                throw new Exception("Could not get service IWorldData. Report this issue to the developer of this mod.");
+            }
+            circuitryManager = Program.Get<ICircuitryManager>();
+            if (circuitryManager == null)
+            {
+                throw new Exception("Could not get service ICircuitryManager. Report this issue to the developer of this mod.");
+            }
+            //Reflection, to cleanup after LogicWorld, when deleting a Bundler:
+            clusterProperty = typeof(InputPeg).GetProperty("Cluster", BindingFlags.NonPublic | BindingFlags.Instance);
+            if(clusterProperty == null)
+            {
+                throw new Exception("Could not find property 'Cluster' in class InputPeg. Report this issue to the developer of this mod.");
+            }
+            linkerField = typeof(Cluster).GetField("Linker", BindingFlags.NonPublic | BindingFlags.Instance);
+            if(linkerField == null)
+            {
+                throw new Exception("Could not find field 'Linker' in class Cluster. Report this issue to the developer of this mod.");
+            }
+        }
+
+        //Only update the logic when the connection peg has some change. Else it is the data pegs, which do not matter for the linking:
+        public override bool InputAtIndexShouldTriggerComponentLogicUpdates(int inputIndex)
+        {
+            return inputIndex == 0;
+        }
+
+        private Bundler getRemoteBundler()
+        {
+            HashSet<WireAddress> connectionWires = worldData.LookupPegWires(Inputs[0].Address);
+            if (connectionWires == null)
+            {
+                //This is null on server start at least.
+                return null;
+            }
+            foreach (WireAddress wireAddress in connectionWires)
+            {
+                Wire wire = worldData.Lookup(wireAddress);
+                PegAddress remotePegAddress = wire.Point1 == Inputs[0].Address ? wire.Point2 : wire.Point1;
+                LogicComponent logicComponent = circuitryManager.LookupComponent(remotePegAddress.ComponentAddress);
+                if (logicComponent != null && logicComponent is Bundler bundler)
                 {
-                    if (connectedPeg != wire.Point1) { connected = false; }
-                    connectedPeg = wire.Point1;
-                }
-                else
-                {
-                    if (connectedPeg != wire.Point2) { connected = false; }
-                    connectedPeg = wire.Point2;
-                }
-                if (!connected)
-                {
-                    connectedComponentInWorld = (IComponentInWorld)lookupComponentDelegate.DynamicInvoke(connectedPeg.ComponentAddress);
-                    Bundler connectedComponent;
-                    bool result = Bundlers.Components.TryGetValue(connectedComponentInWorld, out connectedComponent);
-                    if (result)
-                    {
-                        for (int i = 1; i < base.Inputs.Count; i++)
-                        {
-                            try
-                            {
-                                connectedComponent.Inputs[connectedComponent.Inputs.Count - i].AddOneWayPhasicLinkTo(base.Inputs[base.Inputs.Count - i]);
-                            }
-                            catch (ArgumentOutOfRangeException) { break; }
-                        }
-                        connected = true;
-                    }
+                    return bundler; //Found the (first) bundler.
                 }
             }
-            else if (wireAddresses != null)
+            return null;
+        }
+
+        protected override void DoLogicUpdate()
+        {
+            Bundler currentBundler = getRemoteBundler();
+            if (currentBundler == remoteBundler)
             {
-                if (connected & wireAddresses.Count == 1)
+                //The bundler has not changed, all good.
+                return;
+            }
+            //The bundler has changed! Update phasic links:
+            
+            //Unlink old bundler:
+            unlinkBundler();
+            remoteBundler = currentBundler; //Done unlinking, apply new bundler.
+
+            //Link new bundler:
+            linkBundler();
+        }
+
+        public override void OnComponentDestroyed()
+        {
+            remoteBundler.unregisterSplitter(this);
+            remoteBundler = null;
+        }
+
+        public void bundlerDestroyed()
+        {
+            cleanupWhatLogicWorldDoesNotWantToCleanUp();
+            remoteBundler = null;
+        }
+
+        private void linkBundler()
+        {
+            if (remoteBundler != null)
+            {
+                int maxLocal = base.Inputs.Count - 1; //Splitter
+                int maxRemote = remoteBundler.Inputs.Count; //Bundler
+                int maxLinks = maxRemote < maxLocal ? maxRemote : maxLocal;
+                maxRemote -= 1;
+                for (int i = 0; i < maxLinks; i++)
                 {
-                    Bundler connectedComponent;
-                    bool result = Bundlers.Components.TryGetValue(connectedComponentInWorld, out connectedComponent);
-                    if (result)
-                    {
-                        for (int i = 1; i < base.Inputs.Count; i++)
-                        {
-                            try
-                            {
-                                connectedComponent.Inputs[connectedComponent.Inputs.Count - i].RemoveOneWayPhasicLinkTo(base.Inputs[base.Inputs.Count - i]);
-                            }
-                            catch (ArgumentOutOfRangeException) { break; }
-                        }
-                        connected = false;
-                    }
+                    remoteBundler.Inputs[maxRemote - i].AddOneWayPhasicLinkTo(base.Inputs[maxLocal - i]);
                 }
-                else if (connected & wireAddresses.Count == 0)
+                remoteBundler.registerSplitter(this);
+            }
+        }
+
+        private void unlinkBundler()
+        {
+            if (remoteBundler != null)
+            {
+                int maxLocal = base.Inputs.Count - 1; //Splitter
+                int maxRemote = remoteBundler.Inputs.Count; //Bundler
+                int maxLinks = maxRemote < maxLocal ? maxRemote : maxLocal;
+                maxRemote -= 1;
+                for (int i = 0; i < maxLinks; i++)
                 {
-                    FieldInfo pegField = typeof(InputPeg).GetField("CircuitStates", BindingFlags.NonPublic | BindingFlags.Instance);
-                    for (int i = 1; i < base.Inputs.Count; i++)
-                    {
-                        InputPeg inputPegObj = (InputPeg)base.Inputs[i];
-                        CircuitStates pegFieldValue = (CircuitStates)pegField.GetValue(inputPegObj);
-                        pegFieldValue[inputPegObj.StateID] = false;
-                        pegField.SetValue(inputPegObj, pegFieldValue);
-                    }
+                    remoteBundler.Inputs[maxRemote - i].RemoveOneWayPhasicLinkTo(base.Inputs[maxLocal - i]);
                 }
+                remoteBundler.unregisterSplitter(this);
+            }
+        }
+
+        private void cleanupWhatLogicWorldDoesNotWantToCleanUp()
+        {
+            //Or basically cause a linker uncertain propagation update of the output clusters.
+            for(int i = 1; i < Inputs.Count; i++)
+            {
+                IInputPeg output = Inputs[i];
+                Cluster cluster = (Cluster) clusterProperty.GetValue(output);
+                if(cluster == null)
+                {
+                    continue;
+                }
+                ClusterLinker linker = (ClusterLinker) linkerField.GetValue(cluster);
+                if(linker == null)
+                {
+                    continue;
+                }
+                linker.QueueUncertaintyPropagation();
             }
         }
     }
