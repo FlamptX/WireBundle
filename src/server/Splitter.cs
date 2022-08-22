@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Linq;
 
@@ -10,6 +9,7 @@ using LogicAPI.Data;
 using LogicLog;
 
 using LogicWorld.SharedCode.Components;
+using LogicWorld.Server;
 using LogicWorld.Server.Circuitry;
 using LogicWorld.SharedCode;
 
@@ -25,27 +25,17 @@ namespace WireBundle.Components
         private PegAddress connectedPeg;
         private bool connected = false;
 
-        // Reflection is nice
-        private static Assembly SharedCodeAssembly = AppDomain.CurrentDomain.GetAssemblies().First(x => x.GetName().Name == "LogicWorld.SharedCode");
-        private static Type worldDataType = SharedCodeAssembly.GetType("LogicWorld.SharedCode.WorldData");
-        private static MethodInfo LookupPegWires = worldDataType.GetMethod("LookupPegWires");
-        private static MethodInfo LookupWire = worldDataType.GetMethod("Lookup", new Type[]{ typeof(WireAddress) });
-        private static MethodInfo LookupComponent = worldDataType.GetMethod("Lookup", new Type[]{ typeof(ComponentAddress) });
-        private static object worldDataInstance = LogicAPI.Service.Get<IWorldData>();
-
-        private static Delegate lookupPegWiresDelegate = LookupPegWires.CreateDelegate(Expression.GetDelegateType(
-           (from parameter in LookupPegWires.GetParameters() select parameter.ParameterType)
-           .Concat(new[] { LookupPegWires.ReturnType })
-           .ToArray()), worldDataInstance);
-        private static Delegate lookupWireDelegate = LookupWire.CreateDelegate(Expression.GetDelegateType(
-            (from parameter in LookupWire.GetParameters() select parameter.ParameterType)
-            .Concat(new[] { LookupWire.ReturnType })
-            .ToArray()), worldDataInstance);
-        private static Delegate lookupComponentDelegate = LookupComponent.CreateDelegate(Expression.GetDelegateType(
-            (from parameter in LookupComponent.GetParameters() select parameter.ParameterType)
-            .Concat(new[] { LookupComponent.ReturnType })
-            .ToArray()), worldDataInstance);
-
+        private static readonly IWorldData worldData;
+        
+        static Splitter()
+        {
+            worldData = Program.Get<IWorldData>();
+            if(worldData == null)
+            {
+                throw new Exception("Could not get service IWorldData. Report this issue to the developer of this mod.");
+            }
+        }
+        
         protected override void Initialize()
         {
             pegAddress = base.Inputs[0].Address;
@@ -53,10 +43,10 @@ namespace WireBundle.Components
  
         protected override void DoLogicUpdate()
         {
-            HashSet<WireAddress> wireAddresses = (HashSet<WireAddress>)lookupPegWiresDelegate.DynamicInvoke(pegAddress);
+            HashSet<WireAddress> wireAddresses = worldData.LookupPegWires(pegAddress);
             if (base.Inputs[0].On)
             {
-                Wire wire = (Wire)lookupWireDelegate.DynamicInvoke(wireAddresses.First());
+                Wire wire = worldData.Lookup(wireAddresses.First());
                 if (wire.Point1.ToString() != pegAddress.ToString())
                 {
                     if (connectedPeg != wire.Point1) { connected = false; }
@@ -69,7 +59,7 @@ namespace WireBundle.Components
                 }
                 if (!connected)
                 {
-                    connectedComponentInWorld = (IComponentInWorld)lookupComponentDelegate.DynamicInvoke(connectedPeg.ComponentAddress);
+                    connectedComponentInWorld = worldData.Lookup(connectedPeg.ComponentAddress);
                     Bundler connectedComponent;
                     bool result = Bundlers.Components.TryGetValue(connectedComponentInWorld, out connectedComponent);
                     if (result)
