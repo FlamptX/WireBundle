@@ -32,6 +32,10 @@ namespace WireBundle.Components
         private static MethodInfo LookupWire = worldDataType.GetMethod("Lookup", new Type[]{ typeof(WireAddress) });
         private static MethodInfo LookupComponent = worldDataType.GetMethod("Lookup", new Type[]{ typeof(ComponentAddress) });
         private static object worldDataInstance = LogicAPI.Service.Get<IWorldData>();
+        private static PropertyInfo clusterProperty = typeof(InputPeg).GetProperty("Cluster", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static FieldInfo linkerField = typeof(Cluster).GetField("Linker", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static FieldInfo linkedLeaders = typeof(ClusterLinker).GetField("LinkedLeaders", BindingFlags.NonPublic | BindingFlags.Instance);
+
 
         private static Delegate lookupPegWiresDelegate = LookupPegWires.CreateDelegate(Expression.GetDelegateType(
            (from parameter in LookupPegWires.GetParameters() select parameter.ParameterType)
@@ -46,38 +50,6 @@ namespace WireBundle.Components
             .Concat(new[] { LookupComponent.ReturnType })
             .ToArray()), worldDataInstance);
 
-        private void checkPeg(PegAddress pegToCheck, List<Bundler> ListToMake, List<PegAddress> Checked)
-        {
-            Checked.Add(pegToCheck);
-            HashSet<WireAddress> wireAddresses = (HashSet<WireAddress>)lookupPegWiresDelegate.DynamicInvoke(pegToCheck);
-            if (wireAddresses != null)
-            {
-                foreach (WireAddress wa in wireAddresses)
-                {
-                    Wire wire = (Wire)lookupWireDelegate.DynamicInvoke(wa);
-                    PegAddress connectedPeg;
-                    if (wire.Point1.ToString() != pegToCheck.ToString())
-                    {
-                        connectedPeg = wire.Point1;
-                    }
-                    else
-                    {
-                        connectedPeg = wire.Point2;
-                    }
-                    IComponentInWorld connectedComponentInWorldToTest = (IComponentInWorld)lookupComponentDelegate.DynamicInvoke(connectedPeg.ComponentAddress);
-                    Bundler connectedComponent;
-                    bool result = Bundlers.Components.TryGetValue(connectedComponentInWorldToTest, out connectedComponent);
-                    if (result)
-                    {
-                        ListToMake.Add(connectedComponent);
-                    }
-                    if (!Checked.Contains(connectedPeg))
-                    {
-                        checkPeg(connectedPeg, ListToMake, Checked);
-                    }
-                }
-            }
-        }
         protected override void Initialize()
         {
             pegAddress = base.Inputs[0].Address;
@@ -86,8 +58,32 @@ namespace WireBundle.Components
         protected override void DoLogicUpdate()
         {
             List<Bundler> connectedBundlersToTest = new List<Bundler>();
-            List<PegAddress> Checked = new List<PegAddress>();
-            checkPeg(pegAddress, connectedBundlersToTest, Checked);
+            Cluster cluster = (Cluster)clusterProperty.GetValue(base.Inputs[0]);
+            ClusterLinker linker = (ClusterLinker)linkerField.GetValue(cluster);
+            foreach (OutputPeg pegTC in cluster.ConnectedOutputs)
+			{
+                Bundler connectedComponent;
+                bool result = Bundlers.Components.TryGetValue(pegTC.oAddress, out connectedComponent);
+                if (result)
+                {
+                    connectedBundlersToTest.Add(connectedComponent);
+                }
+            }
+            if (linker != null)
+			{
+                foreach (ClusterLinker connectedClusterLinker in (List<ClusterLinker>)linkedLeaders.GetValue(linker))
+                {
+                    foreach (OutputPeg pegTC in connectedClusterLinker.ClusterBeingLinked.ConnectedOutputs)
+                    {
+                        Bundler connectedComponent;
+                        bool result = Bundlers.Components.TryGetValue(pegTC.oAddress, out connectedComponent);
+                        if (result)
+                        {
+                            connectedBundlersToTest.Add(connectedComponent);
+                        }
+                    }
+                }
+            }
             IEnumerable<Bundler> Unchanged = connectedBundlers.Intersect(connectedBundlersToTest);
             if (!((connectedBundlers.Count() == Unchanged.Count()) & (connectedBundlersToTest.Count() == Unchanged.Count())))
             {
