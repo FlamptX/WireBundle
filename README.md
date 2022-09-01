@@ -5,9 +5,7 @@
 ## Info
 This mod does not use a custom wire to transfer the data. The splitter only uses the wire that is connecting the components to fetch the data from the bundler.
 
-The mod has two components, the bundler and the splitter. Use the bundler to bundle inputs and connect it **directly** to the splitter as it won't work otherwise (for now).
-
-Connecting two components to the splitter will just use the first bundler that it finds although I am planning to make it merge multiple bundlers.
+The mod has two components, the bundler and the splitter. Use the bundler to bundle inputs and connect it to the splitter.
 
 ## Contributing and issues
 Contributions are welcome!
